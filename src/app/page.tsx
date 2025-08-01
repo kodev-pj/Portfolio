@@ -18,25 +18,25 @@ export default function Home() {
     {
       name: "Surgical Log",
       summary:
-        "プリ。",
+        "手術記録アプリ（卒業研究・制作）（iPadOS）",
       type: "personal",
     },
     {
-      name: "PetsHealth",
+      name: "Pets Health",
       summary:
-        "ペットの健康状態を記録・管理できるiOSアプリ。",
+        "ペットの健康状態の記録・管理アプリ（iOS）",
       type: "personal",
     },
     {
       name: "Analyze Documents",
       summary:
-        "PDFからテキスト情報抽出→CSV生成。Next.js + Flask + Gemini API。",
+        "PDFからAIでテキスト抽出→CSV生成（Web）",
       type: "team",
     },
     {
       name: "NOIR",
       summary:
-        "ファッション",
+        "ファッションSNSアプリ（iOS）",
       type: "team",
     },
   ];
@@ -95,15 +95,15 @@ export default function Home() {
           </h2>
           {showAbout && (
             <p className={`block-text ${visibleAbout ? "toggle-content" : "toggle-exit"}`}>
-              ⚪︎ 2003年3月23日生まれ。🇨🇳 延吉市出身。
+              ⚪︎ 2003年3月23日生まれ
               <br />
-              ⚪︎ 東京国際工科専門職大学 | 工科学部・情報工学科に在学中。  
+              ⚪︎ 東京国際工科専門職大学 | 工科学部・情報工学科に在学中  
               <br />
-              ⚪︎ iOSアプリやWebサービスの開発、医療現場のIT活用に関心あり。  
+              ⚪︎ iOSアプリやWebアプリの開発、医療ITに関心  
               <br />
               ⚪︎ SwiftUI、Next.js、Javaを使ったモバイルアプリ、Webアプリの開発経験あり。 
               <br/> 
-              ⚪︎ 🇯🇵 🇨🇳 🇰🇷に対応。
+              ⚪︎ 🇯🇵 🇨🇳 🇰🇷
             </p>
           )}
         </section>
@@ -196,6 +196,7 @@ export default function Home() {
                 <ul className="text-sm text-gray-600 list-disc ml-5">
                   <li>Xcode</li>
                   <li>VS Code</li>
+                  <li>Eclipse</li>
                   <li>Photoshop / Illustrator</li>
                   <li>Figma</li>
                   <li>GCP</li>
@@ -226,8 +227,8 @@ export default function Home() {
               <div className="mb-4">
                 <div className="flex gap-2 mt-2">
                   <button className={`filter-button ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>All</button>
-                  <button className={`filter-button ${filter === "personal" ? "active" : ""}`} onClick={() => setFilter("personal")}>個人</button>
-                  <button className={`filter-button ${filter === "team" ? "active" : ""}`} onClick={() => setFilter("team")}>チーム</button>
+                  <button className={`filter-button ${filter === "personal" ? "active" : ""}`} onClick={() => setFilter("personal")}>Personal</button>
+                  <button className={`filter-button ${filter === "team" ? "active" : ""}`} onClick={() => setFilter("team")}>Team</button>
                 </div>
               </div>
               <div className="project-list grid grid-cols-1 sm:grid-cols-2 gap-6">
