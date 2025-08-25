@@ -15,6 +15,7 @@ type Project = {
   approach?: string;
   outcome?: string;
   learnings?: string;
+  github?: string;
 };
 
 export default function Home() {
@@ -62,6 +63,7 @@ export default function Home() {
         "・課題であった業務負担を軽減できるWebアプリとして完成。\n・ログイン → アップロード → 結果確認 → CSVダウンロードの一連フローを実現\n・初見でも迷いにくいUI/UX\n・拡張子・サイズ・多ファイルなど運用上の抜け漏れをレビュー段階で解消",
       learnings:
         "・Next.js/Reactの理解\n・認証機能の実装方法\n・UI設計から実装まで一貫して行うことで、利用者視点の重要性を実感\n・チーム内での役割分担やレビューの重要性\n・限られた期間で成果物をまとめ上げる進め方",
+      github: "https://github.com/kodev-pj/Analysis-Documents",
     },
   ];
 
@@ -171,11 +173,11 @@ export default function Home() {
                 <ul className="block-text ml-0">
                   <li className="mb-3">
                     <div className="text-sm text-gray-500">2024年10月〜11月</div>
-                    <div><strong>株式会社アーキテクトコア</strong><br />社内向けWebシステムの改修を担当。既存機能のバグ修正から新機能の追加まで対応。</div>
+                    <div><strong>株式会社アーキテクトコア</strong><br />社内向けWebシステムの改修を担当。既存機能のバグ修正から新機能の追加を行なった。</div>
                   </li>
                   <li>
                     <div className="text-sm text-gray-500">2025年6月〜現在</div>
-                    <div><strong>InnoJin株式会社</strong><br />iOSネイティブアプリのリニューアル開発を中心に、UI/UX改善や機能実装を担当。記事作成、海外事業のリサーチにも従事。</div>
+                    <div><strong>InnoJin株式会社</strong><br />iOSネイティブアプリのリニューアル開発を中心に、UI/UX改善や機能実装を担当。記事作成、海外事業のリサーチなども。</div>
                   </li>
                 </ul>
               </div>
@@ -319,11 +321,24 @@ export default function Home() {
             <h4 className="text-base font-semibold mt-2 mb-1">学び</h4>
             <p className="mb-4 whitespace-pre-line">{selectedProject.learnings}</p>
 
+            {selectedProject.github && (
+              <p className="mb-4">
+                <a
+                  href={selectedProject.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline"
+                >
+                  https://github.com/kodev-pj/Analysis-Documents
+                </a>
+              </p>
+            )}
+
             <button
               onClick={clearProject}
               className="text-sm underline text-blue-500 hover:text-blue-700"
             >
-              Back
+              Close
             </button>
           </section>
         )}
@@ -342,7 +357,7 @@ export default function Home() {
           <hr />
           <p className="small">iOS・Webアプリ開発</p>
           <div className="social-links">
-            <a href="https://github.com/zweidrei4c2" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/kodev-pj" target="_blank" rel="noopener noreferrer">
               <Image src="/image/github-mark.png" alt="GitHub" width={16} height={16} className="inline mr-2" />
               GitHub
             </a>
