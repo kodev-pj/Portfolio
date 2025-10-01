@@ -1,4 +1,4 @@
-# Ichida Ko Portfolio
+# My Portfolio
 
 現在、Notionページをメインにポートフォリオを公開しています。  
 👉 [Notion版ポートフォリオ](https://ko-page.notion.site/ichida-ko-portfolio)
