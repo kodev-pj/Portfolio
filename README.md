@@ -3,4 +3,4 @@
 現在、Notionページをメインにポートフォリオを公開しています。  
 👉 [Notion版ポートフォリオ](https://ko-page.notion.site/ichida-ko-portfolio)
 
-このリポジトリでは、Webアプリ開発の経験を活かし、Next.jsを用いたポートフォリオサイトを制作中です。
+本リポジトリでは学習を兼ねて、生成AIを活用しながらNext.jsで自身のポートフォリオサイトを制作中です。
