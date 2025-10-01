@@ -27,6 +27,8 @@ export default function Home() {
   const [visibleSkills, setVisibleSkills] = useState(true);
   const [showProjects, setShowProjects] = useState(true);
   const [visibleProjects, setVisibleProjects] = useState(true);
+  const [isImageOpen, setIsImageOpen] = useState(false);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
   const projects: Project[] = [
     {
       name: "Surgical Log",
@@ -50,24 +52,24 @@ export default function Home() {
       name: "Analyze Documents",
       type: "team",
       overview:
-        "3年後期から4年前期にかけて行なった実習で、連携企業の業務利用を想定して制作したWebアプリ。Next.jsで構築し、PDFをアップロードするとAI（Gemini）が必要情報をテキスト化し、結果を画面で確認してCSVとしてダウンロードするまでの工程をブラウザ内で完結。実運用を見据えたワークフロー設計により、大量の書類転記を効率化し、ヒューマンエラーの低減を狙った。",
+        "3年後期〜4年前期のソリューション開発実習で、連携企業の実務利用を想定して作ったWebアプリ。\nNext.jsで構築し、PDFのアップロード→AI（Gemini）でテキスト化→画面で確認→CSVでダウンロード、までをブラウザ内で完結。大量の転記作業を減らし、ミスを抑える。\n以下がWebアプリのUIと簡易的なシステム構成図である。",
       background:
-        "連携企業の現場ではPDFベースの書類転記が毎月数万件あり、全て人手で行なっていたため、作業負荷とヒューマンエラーが課題となっていた。ブラウザで完結させることにより処理の標準化と効率化を目指した。",
+        "現場ではPDFの内容を人手で転記しており、件数が多く作業負担と入力ミスが問題だった。ブラウザだけで回るワークフローを用意し、処理の標準化と効率化を狙った。",
       problem:
-        "・数万件の書類を人手で処理しているため人的負担が大きい\n・フォーマットが統一されていない\n・ヒューマンエラーが発生",
+        "・人手の転記に時間とコストがかかる\n・全角/半角や記号差など書式の揺れで整合性が崩れる\n・権限管理や監査の観点から、認証とセッション管理が必要",
       role:
-        "フロントエンド全般を担当。UI/UXデザインから機能の実装を行なった。",
+        "フロントエンドを担当。UI設計、ページ作成、認証、結果表示、CSV出力まで一通りを実装。",
       approach:
-        "・アップロード：拡張子/サイズ検証、ドラッグ＆ドロップ\n・結果整形：テキスト抽出結果のテーブル表示、抽出テキストが場合によって全角/半角が混在するためtoHalfWidthを用いて半角に統一\n・CSV出力：抽出値に実行日時・ログイン者名（担当者）を付与\n・認証/運用：NextAuth.jsによるMicrosoft OAuth、未ログイン時の操作制限、無操作30分で自動ログアウト",
+        "・アップロード：複数PDF、拡張子/サイズ検証、ドラッグ＆ドロップ\n・結果表示：テーブル化、toHalfWidthで表記ゆれを正規化\n・CSV出力：抽出結果に実行日時・ログイン者名を付与\n・認証/運用：NextAuth.js（Microsoft OAuth）、未ログイン操作のブロック、無操作30分で自動サインアウト",
       outcome:
-        "・課題であった業務負担を軽減できるWebアプリとして完成。\n・ログイン → アップロード → 結果確認 → CSVダウンロードの一連フローを実現\n・初見でも迷いにくいUI/UX\n・拡張子・サイズ・多ファイルなど運用上の抜け漏れをレビュー段階で解消",
+        "・ログイン→アップロード→確認→CSVのフローを一本化\n・デスクトップ前提のUIで初見でも迷いにくい操作感\n・拡張子/サイズ/多ファイルやセッション管理など運用要件を満たす形に整理",
       learnings:
-        "・Next.js/Reactの理解\n・認証機能の実装方法\n・UI設計から実装まで一貫して行うことで、利用者視点の重要性を実感\n・チーム内での役割分担やレビューの重要性\n・限られた期間で成果物をまとめ上げる進め方",
+        "・Next.jsの基礎（ルーティング、SSR/CSRの使い分け、型設計）\n・NextAuth.jsでの認証/セッション管理と自動サインアウト\n・UI設計→実装→検証を通じて、作業動線を優先して決める重要性\n・役割分担とPRレビューの早回しで品質と速度を両立\n・期限内に仕上げるためのスコープ管理と優先度の付け方",
       github: "https://github.com/kodev-pj/Analysis-Documents",
     },
   ];
 
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [openProjectNames, setOpenProjectNames] = useState<string[]>([]);
   const [filter, setFilter] = useState<"all" | "personal" | "team">("all");
 
   const filteredProjects = projects.filter((project) => {
@@ -76,25 +78,31 @@ export default function Home() {
   });
 
   const openProject = (project: Project) => {
-    setSelectedProject(project);
-    setTimeout(() => {
-      const detail = document.getElementById("project-detail");
-      detail?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    const name = project.name;
+    setOpenProjectNames((prev) => {
+      const isOpen = prev.includes(name);
+      const next = isOpen ? prev.filter((n) => n !== name) : [...prev, name];
+      // Scroll the project card into view after layout updates
+      setTimeout(() => {
+        const el = document.getElementById(`project-card-${name.replace(/\s+/g, "-").toLowerCase()}`);
+        el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+      return next;
+    });
   };
 
-  const clearProject = () => {
-    const detail = document.getElementById("project-detail");
-    if (detail) {
-      detail.classList.add("project-detail-exit");
-      setTimeout(() => {
-        setSelectedProject(null);
-        const projects = document.getElementById("projects");
-        projects?.scrollIntoView({ behavior: "smooth" });
-      }, 500);
-    } else {
-      setSelectedProject(null);
-    }
+  const clearProject = (target: Project) => {
+    setOpenProjectNames((prev) => prev.filter((n) => n !== target.name));
+  };
+
+  const openImage = (src: string) => {
+    setImageSrc(src);
+    setIsImageOpen(true);
+  };
+
+  const closeImage = () => {
+    setIsImageOpen(false);
+    setTimeout(() => setImageSrc(null), 200);
   };
 
   return (
@@ -121,7 +129,7 @@ export default function Home() {
           </h2>
           {showAbout && (
             <p className={`block-text ${visibleAbout ? "toggle-content" : "toggle-exit"}`}>
-              2003年3月23日生まれ
+              2003年生まれ
               <br />
               東京国際工科専門職大学 工科学部 情報工学科 4年次在学中  
               <br />
@@ -172,12 +180,12 @@ export default function Home() {
                 <h3 className="mt-2 mb-2 font-semibold">Experience</h3>
                 <ul className="block-text ml-0">
                   <li className="mb-3">
-                    <div className="text-sm text-gray-500">2024年10月〜11月</div>
-                    <div><strong>株式会社アーキテクトコア</strong><br />社内向けWebシステムの改修を担当。既存機能のバグ修正から新機能の追加を行なった。</div>
-                  </li>
-                  <li>
                     <div className="text-sm text-gray-500">2025年6月〜現在</div>
                     <div><strong>InnoJin株式会社</strong><br />iOSネイティブアプリのリニューアル開発を中心に、UI/UX改善や機能実装を担当。記事作成、海外事業のリサーチなども。</div>
+                  </li>
+                  <li>
+                    <div className="text-sm text-gray-500">2024年10月〜11月</div>
+                    <div><strong>株式会社アーキテクトコア</strong><br />社内向けWebシステムの改修を担当。既存機能のバグ修正から新機能の追加を行なった。</div>
                   </li>
                 </ul>
               </div>
@@ -219,11 +227,8 @@ export default function Home() {
                 <h3 className="text-base font-medium mb-1 text-gray-800">Languages</h3>
                 <ul className="text-sm text-gray-600 list-disc ml-5">
                   <li>Swift</li>
-                  <li>Java</li>
                   <li>HTML / CSS</li>
-                  <li>JavaScript / TypeScript</li>
-                  <li>Python</li>
-                  <li>C / C++</li>
+                  <li>JavaScript</li>
                 </ul>
               </div>
               <div>
@@ -231,7 +236,6 @@ export default function Home() {
                 <ul className="text-sm text-gray-600 list-disc ml-5">
                   <li>SwiftUI</li>
                   <li>Next.js / React</li>
-                  <li>Tailwind CSS</li>
                 </ul>
               </div>
               <div>
@@ -239,12 +243,40 @@ export default function Home() {
                 <ul className="text-sm text-gray-600 list-disc ml-5">
                   <li>Xcode</li>
                   <li>VS Code</li>
-                  <li>Eclipse</li>
                   <li>Photoshop / Illustrator</li>
-                  <li>Figma</li>
-                  <li>GCP</li>
                   <li>Git / GitHub</li>
                 </ul>
+              </div>
+            </div>
+          )}
+          {/* Experienced Technologys section */}
+          {showSkills && (
+            <div className="mt-6">
+              <h3 className="text-base font-medium mb-2 text-gray-800">Experienced Technologys</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <h4 className="text-sm font-semibold mb-1 text-gray-700">Languages</h4>
+                  <ul className="text-sm text-gray-600 list-disc ml-5">
+                    <li>Java</li>
+                    <li>TypeScript</li>
+                    <li>Python</li>
+                    <li>C / C++</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold mb-1 text-gray-700">Frameworks / Libraries</h4>
+                  <ul className="text-sm text-gray-600 list-disc ml-5">
+                    <li>Tailwind CSS</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold mb-1 text-gray-700">Tools / IDEs</h4>
+                  <ul className="text-sm text-gray-600 list-disc ml-5">
+                    <li>Eclipse</li>
+                    <li>Figma</li>
+                    <li>GCP</li>
+                  </ul>
+                </div>
               </div>
             </div>
           )}
@@ -255,7 +287,7 @@ export default function Home() {
             className="block-title cursor-pointer select-none"
             onClick={() => {
               if (showProjects) {
-                setSelectedProject(null);
+                setOpenProjectNames([]);
                 setVisibleProjects(false);
                 setTimeout(() => setShowProjects(false), 300);
               } else {
@@ -275,73 +307,138 @@ export default function Home() {
                   <button className={`filter-button ${filter === "team" ? "active" : ""}`} onClick={() => setFilter("team")}>Team</button>
                 </div>
               </div>
-              <div className="project-list grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {filteredProjects.map((project, index) => (
-                  <div
-                    key={index}
-                    className="project-card cursor-pointer"
-                    onClick={() => openProject(project)}
-                  >
-                    <div className="project-name flex items-center justify-between w-full">
-                      <span>{project.name}</span>
+              <div className="project-list flex flex-col gap-6">
+                {filteredProjects.map((project, index) => {
+                  const isOpen = openProjectNames.includes(project.name);
+                  const cardId = `project-card-${project.name.replace(/\s+/g, "-").toLowerCase()}`;
+                  return (
+                    <div key={index} id={cardId} className="w-full">
+                      {/* clickable header card */}
+                      <div
+                        className="project-card cursor-pointer w-full"
+                        onClick={() => openProject(project)}
+                      >
+                        <div className="project-name flex items-center justify-between w-full">
+                          <span>{project.name}</span>
+                          <span className="text-sm text-gray-500">{isOpen ? "▲" : "▼"}</span>
+                        </div>
+                      </div>
+
+                      {/* inline detail right below the card */}
+                      {isOpen && (
+                        <section className="project-detail block fade-in mt-3">
+                          <h3 className="text-xl font-semibold mb-3">{project.name}</h3>
+
+                          {project.overview && (
+                            <>
+                              <h4 className="text-base font-semibold mt-2 mb-1">概要</h4>
+                              <p className="mb-3 whitespace-pre-line">{project.overview}</p>
+                            </>
+                          )}
+
+                          {project.name === "Analyze Documents" && (
+                            <div className="mb-2">
+                              <div
+                                className="w-full cursor-zoom-in rounded-lg overflow-hidden h-72 sm:h-96 md:h-[28rem]"
+                                onClick={() => openImage("/image/main-page.png")}
+                                title="クリックで拡大"
+                              >
+                                <Image
+                                  src="/image/main-page.png"
+                                  alt="Analyze Documents メイン画面"
+                                  width={960}
+                                  height={540}
+                                  className="block w-full h-full object-contain"
+                                />
+                              </div>
+                              <div
+                                className="w-full cursor-zoom-in rounded-lg overflow-hidden h-72 sm:h-96 md:h-[28rem] mt-3"
+                                onClick={() => openImage("/image/system.png")}
+                                title="クリックで拡大"
+                              >
+                                <Image
+                                  src="/image/system.png"
+                                  alt="Analyze Documents システム構成図"
+                                  width={1200}
+                                  height={800}
+                                  className="block w-full h-full object-contain"
+                                />
+                              </div>
+                              <div className="text-xs text-gray-500 mt-0">画像クリックで拡大表示</div>
+                            </div>
+                          )}
+
+                          {project.background && (
+                            <>
+                              <h4 className="text-base font-semibold mt-2 mb-1">背景</h4>
+                              <p className="mb-3 whitespace-pre-line">{project.background}</p>
+                            </>
+                          )}
+
+                          {project.problem && (
+                            <>
+                              <h4 className="text-base font-semibold mt-2 mb-1">課題</h4>
+                              <p className="mb-3 whitespace-pre-line">{project.problem}</p>
+                            </>
+                          )}
+
+                          {project.role && (
+                            <>
+                              <h4 className="text-base font-semibold mt-2 mb-1">役割</h4>
+                              <p className="mb-3 whitespace-pre-line">{project.role}</p>
+                            </>
+                          )}
+
+                          {project.approach && (
+                            <>
+                              <h4 className="text-base font-semibold mt-2 mb-1">工夫ポイント / アプローチ</h4>
+                              <p className="mb-3 whitespace-pre-line">{project.approach}</p>
+                            </>
+                          )}
+
+                          {project.outcome && (
+                            <>
+                              <h4 className="text-base font-semibold mt-2 mb-1">成果</h4>
+                              <p className="mb-3 whitespace-pre-line">{project.outcome}</p>
+                            </>
+                          )}
+
+                          {project.learnings && (
+                            <>
+                              <h4 className="text-base font-semibold mt-2 mb-1">学び</h4>
+                              <p className="mb-4 whitespace-pre-line">{project.learnings}</p>
+                            </>
+                          )}
+
+                          {project.github && (
+                            <p className="mb-4">
+                              <a
+                                href={project.github}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 underline"
+                              >
+                                {project.github}
+                              </a>
+                            </p>
+                          )}
+
+                          <button
+                            onClick={(e) => { e.stopPropagation(); clearProject(project); }}
+                            className="mt-2 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-full hover:bg-blue-600 transition"
+                          >
+                            ✕ Close
+                          </button>
+                        </section>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
         </section>
 
-        {selectedProject && (
-          <section id="project-detail" className="project-detail block fade-in">
-            <h3 className="text-xl font-semibold mb-3">{selectedProject.name}</h3>
-
-            {selectedProject.overview && (
-              <>
-                <h4 className="text-base font-semibold mt-2 mb-1">概要</h4>
-                <p className="mb-3 whitespace-pre-line">{selectedProject.overview}</p>
-              </>
-            )}
-
-            <h4 className="text-base font-semibold mt-2 mb-1">背景</h4>
-            <p className="mb-3 whitespace-pre-line">{selectedProject.background}</p>
-
-            <h4 className="text-base font-semibold mt-2 mb-1">課題</h4>
-            <p className="mb-3 whitespace-pre-line">{selectedProject.problem}</p>
-
-            <h4 className="text-base font-semibold mt-2 mb-1">役割</h4>
-            <p className="mb-3 whitespace-pre-line">{selectedProject.role}</p>
-
-            <h4 className="text-base font-semibold mt-2 mb-1">工夫ポイント / アプローチ</h4>
-            <p className="mb-3 whitespace-pre-line">{selectedProject.approach}</p>
-
-            <h4 className="text-base font-semibold mt-2 mb-1">成果</h4>
-            <p className="mb-3 whitespace-pre-line">{selectedProject.outcome}</p>
-
-            <h4 className="text-base font-semibold mt-2 mb-1">学び</h4>
-            <p className="mb-4 whitespace-pre-line">{selectedProject.learnings}</p>
-
-            {selectedProject.github && (
-              <p className="mb-4">
-                <a
-                  href={selectedProject.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 underline"
-                >
-                  https://github.com/kodev-pj/Analysis-Documents
-                </a>
-              </p>
-            )}
-
-            <button
-              onClick={clearProject}
-              className="text-sm underline text-blue-500 hover:text-blue-700"
-            >
-              Close
-            </button>
-          </section>
-        )}
       </div>
 
       <aside className="sidebar">
@@ -353,7 +450,7 @@ export default function Home() {
           </h3>
           <p>東京国際工科専門職大学</p>
           <p>工科学部 / 情報工学科</p>
-          <p>生年月日：2003年3月23日</p>
+          <p>2003年生まれ</p>
           <hr />
           <p className="small">iOS・Webアプリ開発</p>
           <div className="social-links">
@@ -368,6 +465,32 @@ export default function Home() {
           </div>
         </div>
       </aside>
+      {isImageOpen && imageSrc && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-2"
+          onClick={closeImage}
+        >
+          <div
+            className="relative w-full max-w-7xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
+              src={imageSrc}
+              alt="プレビュー"
+              width={1600}
+              height={900}
+              className="w-full h-auto max-h-[85vh] object-contain rounded-lg"
+            />
+          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); closeImage(); }}
+            className="fixed top-4 right-4 bg-white/90 backdrop-blur-sm text-gray-800 rounded-full px-3 py-1 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="閉じる"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </main>
   );
 }
